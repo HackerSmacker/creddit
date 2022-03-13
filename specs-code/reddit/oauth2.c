@@ -10,7 +10,7 @@
 #include <strings.h>
 #include "json-actor.h"
 #include "json-actor-boxed.h"
-#include "cee-utils.h"
+#include "cog-utils.h"
 #include "reddit.h"
 
 void reddit_access_token_params_from_json_p(char *json, size_t len, struct reddit_access_token_params **pp)

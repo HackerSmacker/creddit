@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   if (!config_file) print_usage(argv[0]);
 
   char *file = argv[optind];
-  s = cee_load_whole_file(file, &len);
+  s = cog_load_whole_file(file, &len);
   spec_name = file;
   spec_buffer.start = s;
   spec_buffer.size = len;

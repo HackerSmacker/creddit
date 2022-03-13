@@ -6,7 +6,7 @@
 
 #include "user-agent.h"
 #include "websockets.h"
-#include "cee-utils.h"
+#include "cog-utils.h"
 
 struct reddit_request_attr {
   /** the object itself */

@@ -1,78 +1,24 @@
 <div align="center">
   <br />
   <p>
-    <a href="https://cee-studio.github.io/orca"><img src="https://raw.githubusercontent.com/cee-studio/orca-docs/master/docs/source/images/logo.svg" width="546" alt="orca" style="background-color:red;" /></a>
+    <a href="https://github.com/cogmasters/creddit.git"><img src="https://raw.githubusercontent.com/Cogmasters/creddit-docs/master/docs/source/images/logo.svg" width="536" alt="Creddit" style="background-color:red;" /></a>
   </p>
   <br />
   <p>
-    Easy to reason, easy to debug, easy to use.
-  </p>
-  <p>
-    Join our Discord server: <br> <a href="https://discord.gg/nBUqrWf"><img src="https://img.shields.io/discord/562694099887587338?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a> </br>
+    <br> <a href="https://discord.gg/Y7Xa6MA82v"><img src="https://img.shields.io/discord/928763123362578552?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a> </br>
   </p>
 </div>
 
 ## About
 
-Orca is implemented in plain C, its symbols are organized to be easily matched to the documentation of the API being covered.
-
-This is done in order to:
-* Minimize the need to thoroughly document every Orca API.
-* Reduce our user's cognitive burden of having to read both Orca API documentation and supported REST API documentation.
-* The codebase becomes easier to navigate.
-
-Orca's implementation has minimum external dependencies to make bot deployment deadly simple.
-
-### Design
-
-- Easy to reason about the code: the most native data structures,
-   the simplest algorithms, and intuitive interfaces.
-
-- Easy to debug (networking and logic) errors: extensive assertion 
-  and logging facilities.
-
-- Easy to use for the end users: highly scalable, all transfers made with
-  Orca are thread-safe.
-
-### Minimal example
-
-```c
-#include <string.h> // strcmp()
-#include <orca/discord.h>
-
-void on_ready(struct discord *client) 
-{
-  const struct discord_user *bot = discord_get_self(client);
-  log_info("Logged in as %s!", bot->username);
-}
-
-void on_message(struct discord *client, const struct discord_message *msg)
-{
-  if (strcmp(msg->content, "ping") != 0)
-    return; // ignore messages that aren't 'ping'
-
-  discord_async_next(client, NULL); // make next request non-blocking (OPTIONAL)
-  struct discord_create_message_params params = { .content = "pong" };
-  discord_create_message(client, msg->channel_id, &params, NULL);
-}
-
-int main(void)
-{
-  struct discord *client = discord_init(BOT_TOKEN);
-  discord_set_on_ready(client, &on_ready);
-  discord_set_on_message_create(client, &on_message);
-  discord_run(client);
-}
-```
-*This is a minimalistic example, refer to [`examples/`](examples/) for a better overview.*
-
-## Build Instructions
+Creddit is implemented in plain C99, its symbols are organized to be easily matched to the documentation of the API being covered.
+Creddit's implementation has minimum external dependencies to make bot deployment deadly simple.
+Creddit is pronounced "credit."
 
 ### On Windows
 
-* Install **WSL2** and get either Ubuntu or Debian [here](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-* **Make sure you are in your Linux $HOME folder before proceeding!**
-* Continue to [On Linux](#on-linux) and follow your distro's building steps.
+* Install **Cygwin**
+* **Make sure that you installed libcurl, gcc, make, and git when you ran the Cygwin installer!**
 
 ### On Linux
 
@@ -81,88 +27,39 @@ The only dependency is `curl-7.4.1` or higher
 #### Ubuntu and Debian
 
 ```bash
-$ sudo apt install -y build-essential libcurl4-openssl-dev
+sudo apt install -y build-essential libcurl4-openssl-dev
 ```
 
 #### Void Linux
 
 ```bash
-$ sudo xbps-install -S libcurl-devel
+sudo xbps-install -S libcurl-devel
+```
+
+#### Alpine
+
+```bash
+sudo apk add curl-dev
 ```
 ### Setting up your environment
 
-#### Clone orca into your workspace
+#### Clone Creddit into your workspace
 
 ```bash
-$ git clone https://github.com/cee-studio/orca.git && cd orca
+$ git clone https://github.com/cogmasters/creddit.git && cd creddit
 ```
 
-#### Compile orca
+#### Compile Creddit 
 
 ```bash
 $ make
 ```
 
-### Configuring orca
+## Installing Creddit
 
-The following outlines the default fields of `config.json`
-```js
-{
-  "logging": { // logging directives
-    "level": "trace",        // trace, debug, info, warn, error, fatal
-    "filename": "bot.log",   // the output file
-    "quiet": false,          // change to true to disable logs in console
-    "overwrite": false,      // overwrite existing file with "filename"
-    "use_color": true,       // log with color
-    "http": {
-      "enable": true,        // generate http specific logging
-      "filename": "http.log" // the output file
-    },
-    "disable_modules": ["WEBSOCKETS", "USER_AGENT"] // disable logging for these modules
-  },
-  ...         // API directives (discord, slack, github, etc)
-}
-```
-
-### Test Echo-Bot
-
-1. Get your bot token and add it to `config.json`, 
-   by assigning it to discord's "token" field. There are 
-   well written instructions from the 
-   [discord-irc](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token)
-   about how to get your bot token and adding it to a server.
-2. Build example executables:
-   ```bash
-   $ make examples
-   ```
-3. Run Echo-Bot:
-   ```bash
-   $ cd examples && ./bot-echo
-   ```
-
-#### Get Echo-Bot Response
-
-Type a message in any channel the bot is part of and the bot should send an echo response in return.
-
-#### Terminate Echo-Bot
-
-With <kbd>Ctrl</kbd>+<kbd>c</kbd> or by closing the Terminal.
-
-### Create your first bot
-
-* Head to `my_bot/`, a special folder set-up for your convenience that may be modified freely.
-* Read our guide for [building your first bot](docs/BUILDING_A_BOT.md).
-
-## Installing orca
-
-Orca can be installed in case developing inside of `my_bot/` doesn't suit your needs:
-```bash
-$ sudo make install
-```
-
-Included headers must be `orca/` prefixed:
+Included headers must be `creddit/` prefixed:
 ```c
-#include <orca/discord.h>
+#include <creddit/discord.h>
 ```
 
 ### Standalone executable
@@ -170,13 +67,18 @@ Included headers must be `orca/` prefixed:
 #### GCC (Recommended)
 
 ```bash
-$ gcc myBot.c -o myBot -pthread -ldiscord -lcurl
+$ gcc myBot.c -o myBot -pthread -lreddit -lcurl
 ```
 
 #### Clang
 
 ```bash
-$ clang myBot.c -o myBot -pthread -ldiscord -lcurl
+$ clang myBot.c -o myBot -pthread -lreddit -lcurl
+```
+
+#### System V UNIX C compiler (not recommended at all)
+```bash
+$ cc -o myBot myBot.c -L/usr/local/lib -I/usr/local/include -ldiscord -lcurl
 ```
 
 ## Recommended debuggers
@@ -188,7 +90,7 @@ First, make sure your executable is compiled with the `-g` flag to ensure human-
 Using valgrind to check for memory leaks:
 
 ```bash
-$ valgrind --leak-check=full ./myBot
+valgrind --leak-check=full ./myBot
 ```
 For a more comprehensive guide check [Valgrind's Quick Start](https://valgrind.org/docs/manual/quick-start.html).
 
@@ -212,16 +114,10 @@ For a more comprehensive guide check [Beej's Quick Guide to GDB](https://beej.us
 
 ## Support
 
-Problems? Check out our [Discord Server](https://discord.gg/nBUqrWf).
-
-## Links
-
-- [Documentation](https://cee-studio.github.io/orca/)
-- [Building your first bot](docs/BUILDING_A_BOT.md)
-- [Contributing](docs/CONTRIBUTING.md)
-<!-- - [Internals](docs/INTERNALS.md) -->
+Problems? Check out our [Discord Server](https://discord.gg/Y7Xa6MA82v).
 
 ## Contributing
-Check our [Contributing Guidelines](docs/CONTRIBUTING.md) to get started! If you are here for the Discord API, please check our [Discord API Roadmap](docs/DISCORD_ROADMAP.md).
+
+All kinds of contributions are welcome, all we ask is to abide to our [guidelines](docs/CONTRIBUTING.md)! If you want to help but is unsure where to get started then our [Reddit API Roadmap](docs/REDDIT_ROADMAP.md) is a good starting point. Check our [links](#links) for more helpful information.
 
 **Give us a star if you like this project!**

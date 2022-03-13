@@ -5,20 +5,20 @@ OBJDIR        := obj
 LIBDIR        := lib
 SPECS_DIR     := specs
 SPECSCODE_DIR := specs-code
-CEEUTILS_DIR  := cee-utils
+COGUTILS_DIR  := cog-utils
 COMMON_DIR    := common
 THIRDP_DIR    := $(COMMON_DIR)/third-party
 EXAMPLES_DIR  := examples
 TEST_DIR      := test
 ORCADOCS_DIR  := orca-docs
 
-CEEUTILS_SRC := $(CEEUTILS_DIR)/cee-utils.c        \
-                $(CEEUTILS_DIR)/json-actor.c       \
-                $(CEEUTILS_DIR)/json-actor-boxed.c \
-                $(CEEUTILS_DIR)/json-string.c      \
-                $(CEEUTILS_DIR)/log.c              \
-                $(CEEUTILS_DIR)/logconf.c          \
-                $(CEEUTILS_DIR)/ntl.c
+COGUTILS_SRC := $(COGUTILS_DIR)/cog-utils.c        \
+                $(COGUTILS_DIR)/json-actor.c       \
+                $(COGUTILS_DIR)/json-actor-boxed.c \
+                $(COGUTILS_DIR)/json-string.c      \
+                $(COGUTILS_DIR)/log.c              \
+                $(COGUTILS_DIR)/logconf.c          \
+                $(COGUTILS_DIR)/ntl.c
 
 COMMON_SRC   := $(COMMON_DIR)/common.c     \
                 $(COMMON_DIR)/work.c       \
@@ -29,29 +29,20 @@ THIRDP_SRC   := $(THIRDP_DIR)/sha1.c           \
                 $(THIRDP_DIR)/curl-websocket.c \
                 $(THIRDP_DIR)/threadpool.c
 
-SRC  := $(CEEUTILS_SRC) $(COMMON_SRC) $(THIRDP_SRC)
+SRC  := $(COGUTILS_SRC) $(COMMON_SRC) $(THIRDP_SRC)
 OBJS := $(SRC:%.c=$(OBJDIR)/%.o)
 
 # APIs src
-DISCORD_SRC := $(wildcard discord-*.c $(SPECSCODE_DIR)/discord/*.c)
-GITHUB_SRC  := $(wildcard github-*.c $(SPECSCODE_DIR)/github/*.c)
 REDDIT_SRC  := $(wildcard reddit-*.c $(SPECSCODE_DIR)/reddit/*.c)
-SLACK_SRC   := $(wildcard slack-*.c $(SPECSCODE_DIR)/slack/*.c)
 
 # APIs objs
-DISCORD_OBJS := $(DISCORD_SRC:%.c=$(OBJDIR)/%.o)
-GITHUB_OBJS  := $(GITHUB_SRC:%.c=$(OBJDIR)/%.o)
 REDDIT_OBJS  := $(REDDIT_SRC:%.c=$(OBJDIR)/%.o)
-SLACK_OBJS   := $(SLACK_SRC:%.c=$(OBJDIR)/%.o)
 
 # API libs
-LIBDISCORD := $(LIBDIR)/libdiscord.a
-LIBGITHUB  := $(LIBDIR)/libgithub.a
 LIBREDDIT  := $(LIBDIR)/libreddit.a
-LIBSLACK   := $(LIBDIR)/libslack.a
 
 CFLAGS += -std=c99 -O0 -g -pthread -D_XOPEN_SOURCE=600          \
-          -I. -I$(CEEUTILS_DIR) -I$(COMMON_DIR) -I$(THIRDP_DIR) \
+          -I. -I$(COGUTILS_DIR) -I$(COMMON_DIR) -I$(THIRDP_DIR) \
           -DLOG_USE_COLOR
 
 WFLAGS += -Wall -Wextra -pedantic
@@ -60,7 +51,7 @@ ifeq (,$(findstring $(CC),stensal-c sfc)) # ifneq stensal-c AND sfc
 	CFLAGS  += -fPIC
 endif
 
-$(OBJDIR)/$(CEEUTILS_DIR)/%.o : $(CEEUTILS_DIR)/%.c
+$(OBJDIR)/$(COGUTILS_DIR)/%.o : $(COGUTILS_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 $(OBJDIR)/$(THIRDP_DIR)/%.o : $(THIRDP_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -68,19 +59,16 @@ $(OBJDIR)/%.o : %.c
 	$(CC) $(CFLAGS) $(WFLAGS) -c -o $@ $<
 
 all: | $(SPECSCODE_DIR)
-	$(MAKE) discord github reddit slack
+	$(MAKE) reddit
 
-specs_gen: | $(CEEUTILS_DIR)
+specs_gen: | $(COGUTILS_DIR)
 	@ $(MAKE) -C $(SPECS_DIR) clean
 	@ $(MAKE) -C $(SPECS_DIR) gen_source gen_headers_amalgamation
 	@ rm -rf $(SPECSCODE_DIR)
 	mv $(SPECS_DIR)/specs-code $(SPECSCODE_DIR)
 
-cee_utils:
-	./scripts/get-cee-utils.sh
-
-test: all
-	@ $(MAKE) -C $(TEST_DIR)
+cog_utils:
+	./scripts/get-cog-utils.sh
 
 examples: all
 	@ $(MAKE) -C $(EXAMPLES_DIR)
@@ -91,49 +79,31 @@ reddit: $(LIBREDDIT) | $(SPECSCODE_DIR)
 slack: $(LIBSLACK) | $(SPECSCODE_DIR)
 
 # API libraries compilation
-$(LIBDISCORD): $(DISCORD_OBJS) $(OBJS) | $(LIBDIR)
-	$(AR) -cqsv $@ $?
-$(LIBGITHUB): $(GITHUB_OBJS) $(OBJS) | $(LIBDIR)
-	$(AR) -cqsv $@ $?
 $(LIBREDDIT): $(REDDIT_OBJS) $(OBJS) | $(LIBDIR)
-	$(AR) -cqsv $@ $?
-$(LIBSLACK): $(SLACK_OBJS) $(OBJS) | $(LIBDIR)
 	$(AR) -cqsv $@ $?
 
 $(LIBDIR):
 	@ mkdir -p $(LIBDIR)
 $(SPECSCODE_DIR):
 	@ $(MAKE) specs_gen
-$(CEEUTILS_DIR):
-	@ $(MAKE) cee_utils
+$(COGUTILS_DIR):
+	@ $(MAKE) cog_utils
 
-$(DISCORD_OBJS): $(OBJS)
-$(GITHUB_OBJS): $(OBJS)
 $(REDDIT_OBJS): $(OBJS)
-$(SLACK_OBJS): $(OBJS)
-
 $(OBJS): | $(OBJDIR)
 
 $(OBJDIR):
 	@ mkdir -p $(OBJDIR)/$(THIRDP_DIR)                                 \
-	           $(OBJDIR)/$(CEEUTILS_DIR)                               \
+	           $(OBJDIR)/$(COGUTILS_DIR)                               \
 	           $(addprefix $(OBJDIR)/, $(wildcard $(SPECSCODE_DIR)/*))
 
 install:
 	@ mkdir -p $(PREFIX)/lib/
 	@ mkdir -p $(PREFIX)/include/orca
 	install -d $(PREFIX)/lib/
-	install -m 644 $(LIBDISCORD) $(PREFIX)/lib/
-	install -m 644 $(LIBGITHUB) $(PREFIX)/lib/
 	install -d $(PREFIX)/include/orca/
-	install -m 644 *.h $(CEEUTILS_DIR)/*.h $(COMMON_DIR)/*.h             \
+	install -m 644 *.h $(COGUTILS_DIR)/*.h $(COMMON_DIR)/*.h             \
 	               $(THIRDP_DIR)/*.h $(PREFIX)/include/orca/
-	install -d $(PREFIX)/include/orca/$(SPECSCODE_DIR)/discord/
-	install -m 644 $(SPECSCODE_DIR)/discord/*.h                          \
-	               $(PREFIX)/include/orca/$(SPECSCODE_DIR)/discord/
-	install -d $(PREFIX)/include/orca/$(SPECSCODE_DIR)/github/
-	install -m 644 $(SPECSCODE_DIR)/github/*.h                           \
-	               $(PREFIX)/include/orca/$(SPECSCODE_DIR)/github/
 
 echo:
 	@ echo -e 'CC: $(CC)\n'
@@ -141,21 +111,17 @@ echo:
 	@ echo -e 'CFLAGS: $(CFLAGS)\n'
 	@ echo -e 'OBJS: $(OBJS)\n'
 	@ echo -e 'SPECS DIRS: $(wildcard $(SPECSCODE_DIR)/*)\n'
-	@ echo -e 'DISCORD_SRC: $(DISCORD_SRC)\n'
-	@ echo -e 'DISCORD_OBJS: $(DISCORD_OBJS)\n'
 
 clean: 
 	rm -rf $(OBJDIR)
 	rm -rf $(LIBDIR)
-	@ $(MAKE) -C $(TEST_DIR) clean
 	@ $(MAKE) -C $(EXAMPLES_DIR) clean
 
 purge: clean
 	rm -rf $(LIBDIR)
-	rm -rf $(CEEUTILS_DIR)
+	rm -rf $(COGUTILS_DIR)
 	rm -rf $(SPECSCODE_DIR)
 
-# prepare files for generating documentation at .github/workflows/gh_pages.yml
 docs: | $(ORCADOCS_DIR)
 	@ $(MAKE) -C $(SPECS_DIR) clean
 	@ $(MAKE) -C $(SPECS_DIR) gen_headers
@@ -163,7 +129,7 @@ docs: | $(ORCADOCS_DIR)
 	@ mv $(SPECS_DIR)/specs-code $(SPECSCODE_DIR)
 
 $(ORCADOCS_DIR):
-	git clone https://github.com/cee-studio/orca-docs
+	git clone https://github.com/cog-studio/orca-docs
 	cp $(ORCADOCS_DIR)/Doxyfile Doxyfile
 
 .PHONY: all test examples install echo clean purge docs

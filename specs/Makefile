@@ -2,26 +2,22 @@ CC ?= gcc
 
 MAIN := specs-gen
 
-# https://github.com/cee-studio/cee-utils
-CEEUTILS_DIR ?= ../cee-utils
+COGUTILS_DIR ?= ../cog-utils
 
 WDIR   := specs-code
 
 JSON := $(sort $(wildcard */*.json))
 APIS := $(sort $(patsubst %/, %, $(dir $(JSON))))
 
-# specs code-generator dependencies
-DEPS := $(CEEUTILS_DIR)/cee-utils.c   \
-        $(CEEUTILS_DIR)/json-actor.c  \
-        $(CEEUTILS_DIR)/ntl.c         \
-        $(CEEUTILS_DIR)/json-string.c \
-        $(CEEUTILS_DIR)/log.c
+DEPS := $(COGUTILS_DIR)/cog-utils.c   \
+        $(COGUTILS_DIR)/json-actor.c  \
+        $(COGUTILS_DIR)/ntl.c         \
+        $(COGUTILS_DIR)/json-string.c \
+        $(COGUTILS_DIR)/log.c
 
 # default CFLAGS
-CFLAGS  += -O0 -g -Wall -Wno-unused-function -I$(CEEUTILS_DIR)
+CFLAGS  += -O0 -g -Wall -Wno-unused-function -I$(COGUTILS_DIR)
 
-# for inserting newlines at the end of each foreach
-# see https://stackoverflow.com/questions/29651388/insert-a-new-line-in-a-makefile-foreach-loop
 blank :=
 define \n
 
@@ -70,7 +66,7 @@ define generate_headers_amalgamation
 	  $(VAR)$(\n))
 endef
 
-all: $(CEEUTILS_DIR) 
+all: $(COGUTILS_DIR) 
 	$(MAKE) gen_source gen_headers gen_headers_amalgamation
 
 gen_source: | $(WDIR)

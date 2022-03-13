@@ -5,7 +5,7 @@
 
 #include "reddit.h"
 #include "reddit-internal.h"
-#include "cee-utils.h"
+#include "cog-utils.h"
 
 /**
  * @brief Shortcut for setting request attributes expecting a raw JSON response
@@ -15,7 +15,7 @@
 #define REQUEST_ATTR_RAW_INIT(ret_json)                                       \
   {                                                                           \
     ret_json, 0, NULL,                                                        \
-      (void (*)(char *, size_t, void *)) & cee_sized_buffer_from_json, NULL,  \
+      (void (*)(char *, size_t, void *)) & cog_sized_buffer_from_json, NULL,  \
       NULL                                                                    \
   }
 
@@ -322,10 +322,10 @@ reddit_search(struct reddit *client,
 
   ORCA_EXPECT(client, !IS_EMPTY_STRING(subreddit), ORCA_BAD_PARAMETER, "");
   ORCA_EXPECT(client, params != NULL, ORCA_BAD_PARAMETER, "");
-  ORCA_EXPECT(client, cee_str_bounds_check(params->category, 5) != 0,
+  ORCA_EXPECT(client, cog_str_bounds_check(params->category, 5) != 0,
               ORCA_BAD_PARAMETER,
               "Category should be no longer than 5 characters");
-  ORCA_EXPECT(client, cee_str_bounds_check(params->q, 512) > 0,
+  ORCA_EXPECT(client, cog_str_bounds_check(params->q, 512) > 0,
               ORCA_BAD_PARAMETER,
               "Keywords should be no longer than 512 characters");
   ORCA_EXPECT(client,
